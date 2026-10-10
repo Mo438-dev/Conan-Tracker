@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>متابعة كونان</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Markazi+Text:wght@500;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: one narrow column — header + segmented arc progress, filter chips, then a list of arc-tinted episode tabs */
+:root{
+  --bg:#f3f4f7; --surface:#ffffff; --fg:#1b2030; --muted:#5d6477; --line:#dde0e8; --ink:#22314f;
+  --ok:#2f8a55;
+  --f-ui:"IBM Plex Sans Arabic",system-ui,sans-serif;
+  --f-head:"Markazi Text","IBM Plex Sans Arabic",serif;
+  --f-num:"IBM Plex Mono",ui-monospace,monospace;
+  --tint:15%;
+  --a0:#4a6fa5; --a1:#b5475a; --a2:#8b7e9a; --a3:#7b4fa6; --a4:#2a7f8f;
+  --a5:#a08a5c; --a6:#c4682b; --a7:#b08a1e; --a8:#3c8a58;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12151d; --surface:#1a1e29; --fg:#e7e9ef; --muted:#9aa1b3; --line:#2b3140; --ink:#c9d4ee; --ok:#5cc489; --tint:24%;
+  --a0:#6f95cf; --a1:#e06f83; --a2:#ab9fbb; --a3:#a57bd1; --a4:#4fb0c0; --a5:#c8b283; --a6:#e8894a; --a7:#d6ad3e; --a8:#62b981;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12151d; --surface:#1a1e29; --fg:#e7e9ef; --muted:#9aa1b3; --line:#2b3140; --ink:#c9d4ee; --ok:#5cc489; --tint:24%;
+  --a0:#6f95cf; --a1:#e06f83; --a2:#ab9fbb; --a3:#a57bd1; --a4:#4fb0c0; --a5:#c8b283; --a6:#e8894a; --a7:#d6ad3e; --a8:#62b981;
+  color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-ui);font-size:15px;line-height:1.5}
+.wrap{max-width:860px;margin:0 auto;padding-inline:16px;padding-block:28px 60px;display:grid;gap:20px}
+header{display:grid;gap:14px}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+h1{font-family:var(--f-head);font-weight:700;font-size:2.6rem;line-height:1;margin:0;color:var(--ink);text-wrap:balance}
+.sub{color:var(--muted);margin:4px 0 0;font-size:.92rem}
+.big{text-align:left;font-variant-numeric:tabular-nums}
+.big b{font-family:var(--f-num);font-size:1.9rem;color:var(--ink)}
+.big span{color:var(--muted);font-size:.85rem;display:block}
+.bar{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--line);gap:2px}
+.seg{position:relative;background:color-mix(in oklab,var(--c) 22%,var(--surface))}
+.seg i{position:absolute;inset-block:0;inset-inline-start:0;background:var(--c);transition:width .3s}
+.next{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:.92rem}
+.next .lbl{color:var(--muted);font-size:.8rem;letter-spacing:.02em}
+.next b{font-family:var(--f-num)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:.82rem;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:5px 11px;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+.chip .dot{width:9px;height:9px;border-radius:50%;background:var(--c,var(--muted))}
+.chip small{color:var(--muted);font-family:var(--f-num);font-size:.75rem}
+.chip[aria-pressed="true"]{background:color-mix(in oklab,var(--c,var(--ink)) 20%,var(--surface));border-color:var(--c,var(--ink))}
+.chip:focus-visible,.check:focus-visible,.date:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.tools{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
+.legend{display:flex;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:.8rem}
+.legend span{display:inline-flex;gap:4px;align-items:center}
+ol{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+li.row{--c:var(--a0);display:grid;grid-template-columns:auto 5.6rem 1fr auto;gap:12px;align-items:center;
+  padding:11px 14px;border-radius:10px;background:color-mix(in oklab,var(--c) var(--tint),var(--surface));
+  border:1px solid color-mix(in oklab,var(--c) 35%,transparent)}
+li.row.done{background:color-mix(in oklab,var(--c) 8%,var(--surface));border-color:var(--line)}
+li.row.done .title{color:var(--muted)}
+.check{width:28px;height:28px;border-radius:8px;border:2px solid var(--c);background:var(--surface);cursor:pointer;display:grid;place-items:center;padding:0;color:#fff}
+.check svg{width:16px;height:16px;opacity:0}
+.done .check{background:var(--c)} .done .check svg{opacity:1}
+.code{font-family:var(--f-num);font-weight:600;font-size:.88rem;direction:ltr;text-align:right;color:var(--fg)}
+.code small{display:block;font-weight:500;color:var(--muted);font-size:.7rem}
+.main{min-width:0;display:grid;gap:3px}
+.title{direction:ltr;text-align:right;font-weight:600;overflow-wrap:anywhere}
+.title.struck{text-decoration:line-through;text-decoration-thickness:1px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 10px;font-size:.78rem;color:var(--muted);align-items:center}
+.pill{background:color-mix(in oklab,var(--c) 85%,#000 0%);color:#fff;padding:1px 8px;border-radius:5px;font-weight:500;direction:ltr}
+.pill.b{--c:var(--a4)}
+.meta .ltr{direction:ltr;unicode-bidi:isolate}
+.side{display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+.icons{display:flex;gap:4px}
+.ic{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;background:var(--surface);color:var(--fg)}
+.ic svg{width:14px;height:14px}
+.ic.key{color:#b8860b} .ic.fav{color:#e0603a} .ic.up{color:var(--ink)} .ic.new{color:var(--ok)}
+.date{font:inherit;font-size:.76rem;font-weight:500;color:var(--ok);background:none;border:0;padding:0;cursor:pointer;direction:ltr}
+.date input{font:inherit;font-size:.78rem;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:2px 4px}
+.empty{color:var(--muted);text-align:center;padding:30px}
+.status{font-size:.75rem;color:var(--muted)}
+@media (max-width:560px){
+  li.row{grid-template-columns:auto 1fr auto;gap:10px}
+  .code{grid-column:2;grid-row:1;text-align:right}
+  .main{grid-column:1/-1;grid-row:2}
+  .side{grid-column:3;grid-row:1;align-items:flex-end}
+  h1{font-size:2.1rem}
+}
+@media (prefers-reduced-motion:reduce){.seg i{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap" dir="rtl" lang="ar">
+  <header>
+    <div class="top">
+      <div>
+        <h1>متابعة كونان</h1>
+        <p class="sub">القائمة المختارة من الحلقة 1 إلى 1072، ملوّنة حسب الآرك</p>
+      </div>
+      <div class="big"><b id="pct">0%</b><span id="cnt"></span></div>
+    </div>
+    <div class="bar" id="bar"></div>
+    <div class="next" id="next"></div>
+  </header>
+
+  <div class="chips" id="arcs"></div>
+  <div class="tools">
+    <div class="chips" id="states"></div>
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <ol id="list"></ol>
+  <p class="status" id="status"></p>
+</div>
+
+<script>
+const DATA = [{"id":"E1","t":"Roller Coaster Murder Case","c":["Main Storyline (Before Sherry)"],"f":[],"ch":null,"n":null},{"id":"E2","t":"Company’s President’s Daughter Kidnapping Case","c":["Main Storyline (Before Sherry)"],"f":[],"ch":null,"n":null},{"id":"E3","t":"An Idol’s Locked Room Murder Case","c":["Main Storyline (Before Sherry)"],"f":[],"ch":null,"n":null},{"id":"E4","t":"The Coded Map of the City Case","c":["Main Storyline (Before Sherry)"],"f":[],"ch":null,"n":null},{"id":"E5","t":"The Shinkansen’s Bomb Case","c":["Main Storyline (Before Sherry)"],"f":[],"ch":null,"n":null},{"id":"E13","t":"The Strange Person Hunt Murder Case","c":["Sherry Arc"],"f":["new"],"ch":"Miyano Akemi","n":null},{"id":"E43","t":"Conan Edogawa Kidnapping Case","c":["Main Storyline (Before Sherry)"],"f":[],"ch":null,"n":null},{"id":"E48-49","t":"Diplomat Murder Case","c":["Main Storyline (Before Sherry)"],"f":[],"ch":null,"n":null},{"id":"E54","t":"Game Company Murder Case","c":["Main Storyline (Before Sherry)"],"f":[],"ch":null,"n":null},{"id":"E57-58","t":"Holmes Freak Murder Case","c":["Main Storyline (Before Sherry)"],"f":[],"ch":null,"n":null},{"id":"E76","t":"Conan vs. Kaitou Kid","c":["Main Storyline (Before Sherry)"],"f":[],"ch":null,"n":null},{"id":"E118","t":"The Naniwa Serial Murder Case","c":["Main Storyline (Before Sherry)"],"f":[],"ch":null,"n":null},{"id":"E128","t":"The Black Organization: One Billion Yen Robbery Case","c":["Sherry Arc"],"f":["up","new"],"ch":"Miyano Akemi","n":null},{"id":"E129","t":"The Girl from the Black Organization","c":["Sherry Arc"],"f":["up","new","key"],"ch":"Haibara Ai","n":null},{"id":"E130","t":"The Indiscriminate Stadium Threatening Case","c":["Sherry Arc"],"f":[],"ch":null,"n":"6:00–7:10"},{"id":"E153-154","t":"Sonoko’s Dangerous Summer Story","c":["Sherry Arc"],"f":["new"],"ch":"Kyogoku Makoto","n":null},{"id":"E170-171","t":"The Blind Spot in the Darkness","c":["Sherry Arc"],"f":["new"],"ch":"Araide Tomoaki","n":null},{"id":"E176-178","t":"Reunion with the Black Organization","c":["Sherry Arc"],"f":["new","key"],"ch":"Vermouth","n":null},{"id":"E188-193","t":"The Desperate Revival","c":["Transition (After Sherry)"],"f":["fav"],"ch":null,"n":null},{"id":"E194","t":"The Significant Music Box","c":["Transition (After Sherry)"],"f":[],"ch":null,"n":"First 4:00"},{"id":"E219","t":"The Gathering of the Detectives! Shinichi Kudo vs. Kaitou Kid","c":["Transition (After Sherry)"],"f":["new"],"ch":"Karasuma Renya","n":null},{"id":"E222","t":"And Then There Were No Mermaids","c":["Transition (After Sherry)"],"f":[],"ch":null,"n":"21:00–22:00"},{"id":"E226-227","t":"The Battle Game Trap","c":["Vermouth Arc"],"f":["new"],"ch":"Jodie Starling","n":null},{"id":"E230-231","t":"The Mysterious Passenger","c":["Vermouth Arc"],"f":["up","new","key"],"ch":"Akai Shuichi","n":null},{"id":"E258-259","t":"The Man from Chicago","c":["Vermouth Arc"],"f":["new"],"ch":"James Black","n":null},{"id":"E269-270","t":"The Forgotten Memento from the Crime","c":["Vermouth Arc"],"f":[],"ch":null,"n":null},{"id":"E272","t":"The Secret Rushed Omission","c":["Vermouth Arc"],"f":[],"ch":null,"n":"After Ed"},{"id":"E274","t":"The Truth of the Haunted House","c":["Vermouth Arc"],"f":[],"ch":null,"n":"3:30–6:00"},{"id":"E277-278","t":"English Teacher vs. Great Western Detective","c":["Vermouth Arc"],"f":[],"ch":null,"n":null},{"id":"E279","t":"Hooligan’s Labyrinth","c":["Vermouth Arc"],"f":[],"ch":null,"n":"7:20–9:40"},{"id":"E284-285","t":"Chinatown Deja Vu in the Rain","c":["Vermouth Arc"],"f":[],"ch":null,"n":null},{"id":"E286","t":"Shinichi Kudo’s New York Case","c":["Vermouth Arc"],"f":["up","fav","key"],"ch":null,"n":null},{"id":"E289-290","t":"Mitsuhiko’s Mystifying Forest","c":["Vermouth Arc"],"f":[],"ch":null,"n":null},{"id":"E301-302","t":"Parade of Malice and Saint","c":["5 Polices"],"f":["new"],"ch":"Matsuda Jinpei","n":null},{"id":"E304","t":"The Trembling Police Headquarters: 12 Million Hostages","c":["5 Polices"],"f":["fav","new"],"ch":"Hagiwara Kenji","n":null},{"id":"E307-308","t":"On the Trail of a Silent Witness","c":["Vermouth Arc"],"f":["key"],"ch":null,"n":null},{"id":"E309-311","t":"Contact with the Black Organization","c":["Vermouth Arc"],"f":["key"],"ch":null,"n":null},{"id":"E312","t":"Festival Dolls Dyed in the Setting Sun","c":["Vermouth Arc"],"f":[],"ch":null,"n":"5:40–8:00"},{"id":"E329","t":"A Friendship That Can’t Be Bought","c":["Vermouth Arc"],"f":[],"ch":null,"n":"4:25–6:45"},{"id":"E333-334","t":"The Similar Princesses","c":["Vermouth Arc"],"f":[],"ch":null,"n":null},{"id":"E335-336","t":"Secret of the Tohto Film Development Studio","c":["Vermouth Arc"],"f":[],"ch":null,"n":null},{"id":"E338-339","t":"The Four Porsches","c":["Vermouth Arc"],"f":[],"ch":null,"n":null},{"id":"E340-341","t":"Hidden Bathroom Secret","c":["Vermouth Arc"],"f":[],"ch":null,"n":null},{"id":"E344","t":"The Convenience Store Trap","c":["Vermouth Arc"],"f":["up"],"ch":null,"n":"After Ed"},{"id":"E345","t":"A Dual Mystery on a Full Moon Night","c":["Vermouth Arc"],"f":["key"],"ch":null,"n":null},{"id":"E346-347","t":"Find the Buttock’s Mark","c":["Vermouth Arc"],"f":["up"],"ch":null,"n":null},{"id":"E361","t":"Teitan High School’s Ghost Story","c":["Vermouth Arc"],"f":[],"ch":null,"n":"5:30–8:30"},{"id":"E375","t":"A Code of Stars and Tobacco","c":["Transition (After Vermouth)"],"f":[],"ch":null,"n":"After Ed"},{"id":"E387","t":"The Dissonance of the Stradivarius","c":["Transition (After Vermouth)"],"f":[],"ch":null,"n":"After Ed"},{"id":"E394","t":"Big Adventure in the Eccentric Mansion","c":["Transition (After Vermouth)"],"f":[],"ch":null,"n":"2:30–6:40"},{"id":"E400","t":"Ran’s Suspicions","c":["Transition (After Vermouth)"],"f":[],"ch":null,"n":null},{"id":"E401","t":"A Jewel Thief Caught Red-Handed","c":["Transition (After Vermouth)"],"f":[],"ch":null,"n":"2:00–3:40"},{"id":"E425","t":"Black Impact! The Moment the Black Organization Reaches Out","c":["Kir Arc"],"f":["new","key"],"ch":"Mizunashi Rena","n":null},{"id":"E429-430","t":"Two People Who Can’t Return","c":["Kir Arc"],"f":["new"],"ch":"Hondou Eisuke","n":null},{"id":"E462-465","t":"The Shadow of the Black Organization","c":["Kir Arc"],"f":[],"ch":null,"n":null},{"id":"E466","t":"The Unsmashable Snowman","c":["Kir Arc"],"f":[],"ch":null,"n":"First 6:10"},{"id":"E484-485","t":"Whereabouts of the Dark Photograph (Hondo Ethan)","c":["Kir Arc"],"f":[],"ch":null,"n":null},{"id":"E491-504","t":"Clash of Red and Black","c":["Kir Arc"],"f":["key"],"ch":null,"n":null},{"id":"E508","t":"The Blind Spot in the Karaoke Box","c":["Kir Arc"],"f":[],"ch":null,"n":"18:00–End"},{"id":"E509","t":"Red, White, Yellow, and the Detective Boys","c":["Bourbon Arc"],"f":["new"],"ch":"Okiya Subaru","n":null},{"id":"E510","t":"Conan vs. Double Code Mystery","c":["Bourbon Arc"],"f":[],"ch":null,"n":null},{"id":"E511","t":"Deduction Showdown! Shinichi vs. Subaru Okiya","c":["Bourbon Arc"],"f":[],"ch":null,"n":null},{"id":"E521","t":"Murderer, Shinichi Kudo","c":["Bourbon Arc"],"f":[],"ch":null,"n":null},{"id":"E522","t":"Shinichi’s True Face and Ran’s Tears","c":["Bourbon Arc"],"f":[],"ch":null,"n":null},{"id":"E523","t":"What She Truly Wants to Ask","c":["Bourbon Arc"],"f":["up","fav"],"ch":null,"n":null},{"id":"E524-525","t":"The Blue Spark of Hate","c":["Bourbon Arc"],"f":[],"ch":null,"n":null},{"id":"E542-543","t":"Ikkaku Rock’s Disappearing Fish","c":["Bourbon Arc"],"f":["up"],"ch":null,"n":null},{"id":"E558-561","t":"The Mansion of Death and the Red Wall","c":["Bourbon Arc"],"f":["new"],"ch":"Morofushi Taka’aki","n":null},{"id":"E563-564","t":"Detective Boys vs. Robber Group","c":["Bourbon Arc"],"f":["new"],"ch":"Scar Akai","n":null},{"id":"E578","t":"The Crisis Beckoned by the Red Omen","c":["Bourbon Arc"],"f":[],"ch":null,"n":"After 15:40"},{"id":"E579","t":"The Suggestion of Black Thirteen","c":["Bourbon Arc"],"f":["key"],"ch":null,"n":null},{"id":"E580","t":"The Black Time Limit Drawing Near","c":["Bourbon Arc"],"f":["key"],"ch":null,"n":null},{"id":"E581","t":"The Red Shaking Target","c":["Bourbon Arc"],"f":["key"],"ch":null,"n":null},{"id":"E616-621","t":"Holmes’ Revelation","c":["Bourbon Arc"],"f":["up","fav"],"ch":null,"n":null},{"id":"E622-623","t":"Emergency Situation 252","c":["Bourbon Arc"],"f":[],"ch":null,"n":"First 5:10 of E622; After 18:30 of E623"},{"id":"E625","t":"The Screaming Operation Room","c":["Bourbon Arc"],"f":["fav"],"ch":null,"n":"3:20–6:00"},{"id":"E646-647","t":"Deduction Showdown at the Haunted Hotel","c":["Bourbon Arc"],"f":["new"],"ch":"Sera Masumi","n":null},{"id":"E648-650","t":"The Case of the Besieged Detective Agency","c":["Bourbon Arc"],"f":["up"],"ch":null,"n":null},{"id":"E651","t":"Conan vs. Heiji, Deduction Battle Between the Detectives of the East and West","c":["Bourbon Arc"],"f":[],"ch":null,"n":null},{"id":"E656-657","t":"The Professor’s Video Site","c":["Bourbon Arc"],"f":[],"ch":null,"n":null},{"id":"E667-668","t":"Wedding Eve","c":["Bourbon Arc"],"f":["new"],"ch":"Furuya Rei","n":null},{"id":"E671-674","t":"Detectives’ Nocturne","c":["Bourbon Arc"],"f":["key"],"ch":null,"n":null},{"id":"E675","t":"Won’t Forgive Even One Millimeter","c":["Bourbon Arc"],"f":[],"ch":null,"n":null},{"id":"E681-683","t":"The Life-Threatening Broadcast of Love","c":["5 Polices"],"f":["new"],"ch":"Date Wataru","n":null},{"id":"E684-685","t":"Froth, Steam, and Smoke","c":["Bourbon Arc"],"f":[],"ch":null,"n":null},{"id":"E690-691","t":"Yusaku Kudo’s Cold Case","c":["Bourbon Arc"],"f":[],"ch":null,"n":null},{"id":"E699-700","t":"The Shadow Approaching Haibara’s Secret","c":["Bourbon Arc"],"f":[],"ch":null,"n":null},{"id":"E701-704","t":"The Jet-Black Mystery Train","c":["Bourbon Arc"],"f":["key"],"ch":null,"n":null},{"id":"E705","t":"Conan in a Locked Room","c":["Bourbon Arc"],"f":[],"ch":null,"n":null},{"id":"E706","t":"Bourbon Figures It Out","c":["Bourbon Arc"],"f":[],"ch":null,"n":null},{"id":"E723","t":"Sweet and Cold Delivery Service","c":["Bourbon Arc"],"f":[],"ch":null,"n":null},{"id":"E728","t":"The Treasure Chest Filled with Fruits","c":["Bourbon Arc"],"f":[],"ch":null,"n":"8:35–10:40"},{"id":"E731-732","t":"The Ex-Boyfriend Living Next to a Crime Scene","c":["Bourbon Arc"],"f":["new"],"ch":"Haneda Shūkichi","n":null},{"id":"E734","t":"Jodie’s Memories and the Cherry Blossom Viewing Trap","c":["Bourbon Arc"],"f":["key"],"ch":null,"n":null},{"id":"E739","t":"Kogoro in the Bar","c":["Bourbon Arc"],"f":[],"ch":null,"n":"After Ed"},{"id":"E740-741","t":"Bathroom Where Ran Collapsed As Well","c":["Bourbon Arc"],"f":[],"ch":null,"n":null},{"id":"E751","t":"The Case of the Lucky Calico","c":["Bourbon Arc"],"f":[],"ch":null,"n":null},{"id":"E754-756","t":"The Tragedy of the Red Woman","c":["Bourbon Arc"],"f":["new"],"ch":"Sera Mary","n":null},{"id":"E759-760","t":"The Romance Novel with the Unexpected Conclusion","c":["Bourbon Arc"],"f":[],"ch":null,"n":null},{"id":"E763","t":"Conan and Heiji, Code of Love","c":["Bourbon Arc"],"f":[],"ch":null,"n":"Before 4:10"},{"id":"E770-771","t":"The Tense Tea Party","c":["Bourbon Arc"],"f":[],"ch":null,"n":null},{"id":"E779-783","t":"The Scarlet","c":["Bourbon Arc"],"f":["key"],"ch":null,"n":null},{"id":"E786","t":"Taiko Meijin’s Match of Love","c":["Rum Arc"],"f":[],"ch":null,"n":"After Ed"},{"id":"E787-788","t":"The Mystery Sinking in the Midsummer Pool","c":["Rum Arc"],"f":[],"ch":null,"n":null},{"id":"E792-793","t":"Three First Discoverers","c":["Rum Arc"],"f":[],"ch":null,"n":null},{"id":"E810-812","t":"The Darkness of the Prefectural Police","c":["Rum Arc"],"f":["new"],"ch":"Kuroda Hyoue","n":null},{"id":"E814-815","t":"The Actress Blogger’s Locked Room Case","c":["Rum Arc"],"f":[],"ch":null,"n":null},{"id":"E822","t":"The Suspects Are a Passionate Couple","c":["Rum Arc"],"f":[],"ch":null,"n":"Before Op"},{"id":"E827-828","t":"Ramen So Good, It’s to Die For 2","c":["Rum Arc"],"f":[],"ch":null,"n":null},{"id":"E836-837","t":"The Unfriendly Girls Band","c":["Rum Arc","5 Polices"],"f":["new"],"ch":"Morofushi Hiromitsu","n":null},{"id":"E843-844","t":"The Detective Boys in a Grove","c":["Rum Arc"],"f":[],"ch":null,"n":null},{"id":"E847","t":"Chiba’s Difficult UFO Case","c":["Rum Arc"],"f":[],"ch":null,"n":"6:50–7:20"},{"id":"E850","t":"The Marriage Registration’s Password","c":["Rum Arc"],"f":[],"ch":null,"n":"After Ed"},{"id":"E861-862","t":"Just Like a 17 Years Old Crime Scene","c":["Rum Arc"],"f":["new"],"ch":"Haneda Kouji","n":null},{"id":"E863-864","t":"The Spirit Detective’s Murder","c":["Rum Arc"],"f":[],"ch":null,"n":null},{"id":"E866-867","t":"The Betrayal’s Stage","c":["Rum Arc"],"f":["key"],"ch":null,"n":null},{"id":"E878-879","t":"The Blind Spot in the Dressing Room","c":["Rum Arc"],"f":[],"ch":null,"n":null},{"id":"E881-882","t":"The Wizard of the Ripples","c":["Rum Arc"],"f":["new"],"ch":"Akai Tsutomu","n":null},{"id":"E889-890","t":"The New Teacher’s Skeleton Case","c":["Rum Arc"],"f":["new"],"ch":"Wakasa Rumi","n":null},{"id":"E894-895","t":"The Tokyo-Style Detective Show Next Door","c":["Rum Arc"],"f":["new"],"ch":"Wakita Kanenori","n":null},{"id":"E896-897","t":"The Woman with White Hands","c":["Rum Arc"],"f":[],"ch":null,"n":null},{"id":"E909-910","t":"Mystery of the Burning Tent","c":["Rum Arc"],"f":[],"ch":null,"n":null},{"id":"E925-926","t":"The Heartfelt Strap","c":["Rum Arc"],"f":[],"ch":null,"n":null},{"id":"E927-928","t":"The Scarlet School Trip","c":["Rum Arc"],"f":["up","fav"],"ch":null,"n":null},{"id":"E941-942","t":"Search for Maria-chan!","c":["Rum Arc"],"f":[],"ch":null,"n":null},{"id":"E952-954","t":"The Unsolved Cocktail Case","c":["Rum Arc"],"f":["up"],"ch":null,"n":null},{"id":"E972","t":"The Target is the Metropolitan Police Traffic Department","c":["Rum Arc"],"f":[],"ch":null,"n":"9:45–18:00"},{"id":"E984","t":"Kid vs. Komei: The Targeted Lips","c":["Rum Arc"],"f":[],"ch":null,"n":"After Ed"},{"id":"E1003-1005","t":"The 36-Cell Perfect Game","c":["Rum Arc"],"f":[],"ch":null,"n":null},{"id":"E1011-1012","t":"Picking Wild Plants and Clovers","c":["Rum Arc"],"f":[],"ch":null,"n":null},{"id":"M1035-1038","t":"The Carved Black Lacquer Tray","c":["Rum Arc"],"f":[],"ch":null,"n":null},{"id":"M1043-1046","t":"The Meijin’s Beard","c":["Rum Arc"],"f":[],"ch":null,"n":null},{"id":"M1047-1050","t":"He Has It With Him","c":["Rum Arc"],"f":[],"ch":null,"n":null},{"id":"M1051-1054","t":"The Eerie Farm","c":["Rum Arc"],"f":[],"ch":null,"n":null},{"id":"M1058-1060","t":"Deduction Show on TV?!","c":["Rum Arc"],"f":[],"ch":null,"n":null},{"id":"M1061-1066","t":"Umizaru Island","c":["Rum Arc"],"f":["key"],"ch":null,"n":null},{"id":"M1070-1072","t":"To Think We’d Meet At Such a Place…","c":["Rum Arc"],"f":[],"ch":null,"n":null}];
+const ARCS = [
+ ["Main Storyline (Before Sherry)","قبل شيري"],["Sherry Arc","شيري"],["Transition (After Sherry)","انتقالي بعد شيري"],
+ ["Vermouth Arc","فيرموث"],["5 Polices","الشرطة الخمسة"],["Transition (After Vermouth)","انتقالي بعد فيرموث"],
+ ["Kir Arc","كير"],["Bourbon Arc","بوربون"],["Rum Arc","رم"]];
+const arcIdx = Object.fromEntries(ARCS.map((a,i)=>[a[0],i]));
+const ICON = {
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  key:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5-4.8-4.6 6.6-.9z"/></svg>',
+  up:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg>',
+  fav:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 7.8 3.6 4.5 7 4.5c2 0 3.6 1.1 5 2.9 1.4-1.8 3-2.9 5-2.9 3.4 0 5.6 3.3 4.3 6.8-1.8 4.6-9.3 9.2-9.3 9.2z"/></svg>',
+  new:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="9.5" cy="8" r="3.6"/><path d="M3 20c.6-3.6 3.2-5.6 6.5-5.6s5.9 2 6.5 5.6M19 7v6M16 10h6"/></svg>'
+};
+const FLAG = {key:"حلقة محورية",up:"مهمة",fav:"مفضّلة",new:"ظهور شخصية جديدة"};
+function epCount(id){const m=id.slice(1).split('-').map(Number);return m.length>1?m[1]-m[0]+1:1}
+const TOTAL_EPS = DATA.reduce((s,d)=>s+epCount(d.id),0);
+
+let watched = {};           // id -> "YYYY-MM-DD"
+let arcFilter = null, stateFilter = "all", editing = null;
+
+function today(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function fmt(iso){try{return new Date(iso+"T12:00:00").toLocaleDateString("ar-SA-u-ca-gregory-nu-latn",{day:"numeric",month:"short",year:"numeric"})}catch(e){return iso}}
+
+function render(){
+  const done = DATA.filter(d=>watched[d.id]);
+  const doneEps = done.reduce((s,d)=>s+epCount(d.id),0);
+  document.getElementById("pct").textContent = Math.round(done.length/DATA.length*100)+"%";
+  document.getElementById("cnt").textContent = `${done.length} من ${DATA.length} مدخل · ${doneEps}/${TOTAL_EPS} حلقة`;
+  const bar=document.getElementById("bar"); bar.innerHTML="";
+  ARCS.forEach((a,i)=>{
+    const items=DATA.filter(d=>d.c[0]===a[0]); if(!items.length)return;
+    const dn=items.filter(d=>watched[d.id]).length;
+    const s=document.createElement("div"); s.className="seg"; s.style.setProperty("--c",`var(--a${i})`);
+    s.style.flex=items.length; s.title=`${a[1]}: ${dn}/${items.length}`;
+    s.innerHTML=`<i style="width:${dn/items.length*100}%"></i>`; bar.appendChild(s);
+  });
+  const nx=DATA.find(d=>!watched[d.id]);
+  const lastDone=Object.entries(watched).sort((a,b)=>a[1]<b[1]?1:-1)[0];
+  document.getElementById("next").innerHTML = nx
+    ? `<span class="lbl">التالية</span><b dir="ltr">${nx.id}</b><bdi dir="ltr">${nx.t}</bdi>`+(lastDone?`<span class="lbl" style="margin-inline-start:auto">آخر تشييك: ${fmt(lastDone[1])}</span>`:"")
+    : `<b>خلّصت القائمة كلها 🎉</b>`;
+  const ac=document.getElementById("arcs"); ac.innerHTML="";
+  const mk=(label,val,ci,n)=>{const b=document.createElement("button");b.className="chip";if(ci!=null)b.style.setProperty("--c",`var(--a${ci})`);
+    b.setAttribute("aria-pressed",arcFilter===val);b.innerHTML=(ci!=null?'<span class="dot"></span>':"")+label+(n!=null?` <small>${n}</small>`:"");
+    b.onclick=()=>{arcFilter=val;render()};ac.appendChild(b)};
+  mk("الكل",null,null,null);
+  ARCS.forEach((a,i)=>{const it=DATA.filter(d=>d.c.includes(a[0]));mk(a[1],a[0],i,`${it.filter(d=>watched[d.id]).length}/${it.length}`)});
+  const sc=document.getElementById("states"); sc.innerHTML="";
+  [["all","الكل"],["todo","المتبقي"],["done","المشاهَد"]].forEach(([v,l])=>{const b=document.createElement("button");b.className="chip";
+    b.setAttribute("aria-pressed",stateFilter===v);b.textContent=l;b.onclick=()=>{stateFilter=v;render()};sc.appendChild(b)});
+  const list=document.getElementById("list"); list.innerHTML="";
+  const rows=DATA.filter(d=>(!arcFilter||d.c.includes(arcFilter))&&(stateFilter==="all"||(stateFilter==="done")===!!watched[d.id]));
+  if(!rows.length){list.innerHTML='<li class="empty">ما فيه حلقات بهالفلتر</li>';return}
+  for(const d of rows){
+    const ci=arcIdx[d.c[0]], w=watched[d.id], n=epCount(d.id);
+    const li=document.createElement("li"); li.className="row"+(w?" done":""); li.style.setProperty("--c",`var(--a${ci})`);
+    const pills=d.c.map(c=>`<span class="pill" style="--c:var(--a${arcIdx[c]})">${ARCS[arcIdx[c]][1]}</span>`).join("");
+    const icons=d.f.filter(f=>ICON[f]).map(f=>`<span class="ic ${f}" title="${FLAG[f]}" aria-label="${FLAG[f]}">${ICON[f]}</span>`).join("");
+    li.innerHTML=`
+      <button class="check" id="c-${d.id}" aria-pressed="${!!w}" aria-label="تشييك ${d.id}">${ICON.check}</button>
+      <div class="code">${d.id}${n>1?`<small>${n} حلقات</small>`:""}</div>
+      <div class="main">
+        <div class="title">${d.t}</div>
+        <div class="meta">${pills}${d.ch?`<span>شخصية: <span class="ltr">${d.ch}</span></span>`:""}${d.n?`<span>المقطع: <span class="ltr">${d.n}</span></span>`:""}</div>
+      </div>
+      <div class="side"><div class="icons">${icons}</div>${w?(editing===d.id?`<span class="date"><input type="date" id="d-${d.id}" value="${w}"></span>`:`<button class="date" title="تعديل التاريخ">${fmt(w)}</button>`):""}</div>`;
+    li.querySelector(".check").onclick=()=>toggle(d.id);
+    const db_=li.querySelector("button.date"); if(db_) db_.onclick=()=>{editing=d.id;render();const inp=document.getElementById("d-"+d.id);inp&&inp.focus()};
+    const inp=li.querySelector("input[type=date]"); if(inp){inp.onchange=()=>{if(inp.value)setDate(d.id,inp.value);editing=null;render()};inp.onblur=()=>{editing=null;setTimeout(render,0)}}
+    list.appendChild(li);
+  }
+}
+function legend(){document.getElementById("legend").innerHTML=Object.entries(FLAG).map(([k,v])=>`<span><span class="ic ${k}">${ICON[k]}</span>${v}</span>`).join("")}
+
+function saveLocal(){try{localStorage.setItem("conan-watched",JSON.stringify(watched))}catch(e){}}
+function toggle(id){ if(watched[id]){delete watched[id]}else{watched[id]=today()} saveLocal(); render() }
+function setDate(id,v){watched[id]=v;saveLocal()}
+
+try{watched=JSON.parse(localStorage.getItem("conan-watched")||"{}")||{}}catch(e){}
+legend(); render();
+document.getElementById("status").textContent="التشييكات محفوظة في هالمتصفح.";
+</script>
+</body>
+</html>
