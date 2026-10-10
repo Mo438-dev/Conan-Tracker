@@ -224,7 +224,7 @@ function render(){
   const nx=DATA.find(d=>!watched[d.id]);
   const lastDone=Object.entries(watched).sort((a,b)=>a[1]<b[1]?1:-1)[0];
   document.getElementById("next").innerHTML = nx
-    ? `<span class="lbl">التالية</span><b dir="ltr">${nx.id}</b><bdi dir="ltr">${shortTitle(nx.t)}</bdi>`+(lastDone?`<span class="lbl" style="margin-inline-start:auto">آخر تشييك: ${fmt(lastDone[1])}</span>`:"")
+    ? `<span class="lbl">التالية</span><b dir="ltr">${nx.id}</b><bdi dir="ltr">${shortTitle(nx.t)}</bdi>`+(lastDone?`<span class="lbl" style="margin-inline-start:auto">آخر مشاهدة: ${fmt(lastDone[1])}</span>`:"")
     : `<b>خلّصت القائمة كلها 🎉</b>`;
   const ac=document.getElementById("arcs"); ac.innerHTML="";
   const mk=(label,val,ci,n)=>{const b=document.createElement("button");b.className="chip";if(ci!=null)b.style.setProperty("--c",`var(--a${ci})`);
@@ -244,7 +244,7 @@ function render(){
     const pills=d.c.map(c=>`<span class="pill" style="--c:var(--a${arcIdx[c]})">${ARCS[arcIdx[c]][1]}</span>`).join("");
     const icons=d.f.filter(f=>ICON[f]).map(f=>`<span class="ic ${f}" title="${FLAG[f]}" aria-label="${FLAG[f]}">${ICON[f]}</span>`).join("");
     li.innerHTML=`
-      <button class="check" id="c-${d.id}" aria-pressed="${!!w}" aria-label="تشييك ${d.id}">${ICON.check}</button>
+      <button class="check" id="c-${d.id}" aria-pressed="${!!w}" aria-label="مشاهدة ${d.id}">${ICON.check}</button>
       <div class="code">${d.id}${n>1?`<small>${n} حلقات</small>`:""}</div>
       <div class="main">
         <div class="title">${d.t}</div>
@@ -267,7 +267,7 @@ async function push(id,val){
   try{
     const r=await fetch("/api/watched",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,date:val||null})});
     if(!r.ok) throw new Error(r.status);
-    status("القائمة مشتركة، وأي تشييك يظهر للكل.");
+    status("القائمة مشتركة، وأي حلقة تشاهدونها تظهر للكل.");
   }catch(e){status("ما انحفظ آخر تغيير، تأكد من النت وجرّب مرة ثانية.")}
   finally{pending--}
 }
@@ -284,7 +284,7 @@ async function pull(){
       try{localStorage.setItem("conan-migrated","1")}catch(e){}
     }
     watched=server; saveLocal(); render();
-    status("القائمة مشتركة، وأي تشييك يظهر للكل.");
+    status("القائمة مشتركة، وأي حلقة تشاهدونها تظهر للكل.");
   }catch(e){status("ما قدرت أجيب آخر تحديث، المعروض هو آخر نسخة في هالمتصفح.")}
 }
 function shortTitle(s){if(s.length<=36)return s;let o="";for(const w of s.split(" ")){if((o+" "+w).trim().length>34)break;o=(o+" "+w).trim()}return o+"…"}
@@ -358,7 +358,7 @@ function toggle(id){
   if(prev){delete watched[id];push(id,null)}else{watched[id]=today();push(id,watched[id])}
   saveLocal(); render();
   if(!prev){const nb=document.getElementById("c-"+id); if(nb) nb.classList.add("pop"); burstAt(rect,color); celebrateArcs(DATA.find(x=>x.id===id))}
-  toast(prev?"شلت التشييك عن "+id:"تم تشييك "+id,()=>{
+  toast(prev?"ألغينا مشاهدة "+id:"شاهدنا "+id+" ✓",()=>{
     if(prev){watched[id]=prev;push(id,prev)}else{delete watched[id];push(id,null)}
     saveLocal(); render();
   });
