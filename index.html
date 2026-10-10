@@ -171,10 +171,11 @@ li.row.flash{animation:flash 1.6s ease-out}
 <script src="/faces.js"></script>
 <script>
 (function(){const s=document.getElementById("splash");
-  const F=window.FACES||[], n=F.length||1;
+  const F=window.FACES||[], SKIP=[12,13,14,16,17,18,19,21,22,24,27,30], IDX=F.map((_,i)=>i).filter(i=>!SKIP.includes(i+1)), n=IDX.length||1;
   let last=-1; try{last=+localStorage.getItem("lastFace")}catch(e){}
   let k=Math.floor(Math.random()*n); if(n>1&&k===last) k=(k+1+Math.floor(Math.random()*(n-1)))%n;
   try{localStorage.setItem("lastFace",k)}catch(e){}
+  k=IDX[k]??0;
   const hue=Math.round((k*137.508+215)%360);
   s.style.background="linear-gradient(hsl("+hue+",55%,58%),hsl("+hue+",60%,26%))";
   if(F[k]) document.getElementById("face").innerHTML='<svg viewBox="0 0 400 400" width="100%" height="100%"><path fill="#fff" fill-rule="evenodd" d="'+F[k][0]+'"/><path fill="#15161e" fill-rule="evenodd" d="'+F[k][0]+F[k][1]+'"/></svg>';
