@@ -1,6 +1,6 @@
 {
-  "name": "متابعة كونان",
-  "short_name": "كونان",
+  "name": "Conan Tracker",
+  "short_name": "Conan Tracker",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
