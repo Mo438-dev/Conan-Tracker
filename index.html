@@ -188,12 +188,40 @@ function render(){
 function legend(){document.getElementById("legend").innerHTML=Object.entries(FLAG).map(([k,v])=>`<span><span class="ic ${k}">${ICON[k]}</span>${v}</span>`).join("")}
 
 function saveLocal(){try{localStorage.setItem("conan-watched",JSON.stringify(watched))}catch(e){}}
-function toggle(id){ if(watched[id]){delete watched[id]}else{watched[id]=today()} saveLocal(); render() }
-function setDate(id,v){watched[id]=v;saveLocal()}
+function status(s){document.getElementById("status").textContent=s}
+let pending=0;
+async function push(id,val){
+  pending++;
+  try{
+    const r=await fetch("/api/watched",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,date:val||null})});
+    if(!r.ok) throw new Error(r.status);
+    status("القائمة مشتركة، وأي تشييك يظهر للكل.");
+  }catch(e){status("ما انحفظ آخر تغيير، تأكد من النت وجرّب مرة ثانية.")}
+  finally{pending--}
+}
+async function pull(){
+  if(editing||pending) return;
+  try{
+    const r=await fetch("/api/watched",{cache:"no-store"});
+    if(!r.ok) throw new Error(r.status);
+    const server=await r.json();
+    if(editing||pending) return;
+    let migrated=false; try{migrated=localStorage.getItem("conan-migrated")==="1"}catch(e){}
+    if(!migrated){ // one time: send checks this browser had before the list became shared
+      for(const [k,v] of Object.entries(watched)) if(!server[k]){server[k]=v; push(k,v)}
+      try{localStorage.setItem("conan-migrated","1")}catch(e){}
+    }
+    watched=server; saveLocal(); render();
+    status("القائمة مشتركة، وأي تشييك يظهر للكل.");
+  }catch(e){status("ما قدرت أجيب آخر تحديث، المعروض هو آخر نسخة في هالمتصفح.")}
+}
+function toggle(id){ if(watched[id]){delete watched[id];push(id,null)}else{watched[id]=today();push(id,watched[id])} saveLocal(); render() }
+function setDate(id,v){watched[id]=v;saveLocal();push(id,v)}
 
 try{watched=JSON.parse(localStorage.getItem("conan-watched")||"{}")||{}}catch(e){}
-legend(); render();
-document.getElementById("status").textContent="التشييكات محفوظة في هالمتصفح.";
+legend(); render(); status("جاري التحميل…");
+pull(); setInterval(pull,8000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)pull()});
 </script>
 </body>
 </html>
