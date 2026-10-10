@@ -102,6 +102,10 @@ button{touch-action:manipulation;-webkit-user-select:none;user-select:none}
   padding:calc(env(safe-area-inset-top,0px) + 10px) max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));box-shadow:0 2px 10px rgba(0,0,0,.18)}
 .refresh{width:36px;height:36px;border-radius:10px;border:0;background:rgba(255,255,255,.14);color:#fff;display:grid;place-items:center;cursor:pointer;padding:0;flex:none}
 .refresh:active{background:rgba(255,255,255,.28)}
+.refresh.on{background:rgba(255,255,255,.34)}
+.appbar{flex-wrap:wrap}
+.sb{flex-basis:100%;padding-top:8px}
+.sb #q{border-color:transparent}
 .refresh svg{width:20px;height:20px}
 .refresh.spin svg{animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -110,13 +114,13 @@ button{touch-action:manipulation;-webkit-user-select:none;user-select:none}
 .top h1{display:none}
 .wrap{padding-bottom:calc(60px + env(safe-area-inset-bottom,0px))}
 #splash{position:fixed;inset:0;z-index:50;background:linear-gradient(#4676c4,#223e78);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;color:#fff;transition:opacity .45s ease,visibility .45s}
-#splash .mag{width:104px;height:104px;filter:drop-shadow(0 10px 18px rgba(0,0,0,.3));animation:sweep 1s ease-in-out both}
-@keyframes sweep{0%{transform:translate(-34px,14px) rotate(-14deg);opacity:0}35%{opacity:1}65%{transform:translate(14px,-8px) rotate(8deg)}100%{transform:none}}
+#splash .face{width:156px;height:156px;background:url(/faces.png) no-repeat;background-size:700% 200%;filter:drop-shadow(0 12px 22px rgba(0,0,0,.35));animation:facein .7s cubic-bezier(.2,.9,.3,1.35) both}
+@keyframes facein{0%{transform:scale(.4) rotate(-12deg);opacity:0}60%{transform:scale(1.06) rotate(3deg);opacity:1}100%{transform:none}}
 #splash div{font-family:var(--f-ui);font-weight:700;font-size:1.5rem;letter-spacing:.02em;animation:fadeup .6s .15s both}
 #splash.hide{opacity:0;visibility:hidden}
 @keyframes pop{from{transform:scale(.6);opacity:0}}
 @keyframes fadeup{from{transform:translateY(8px);opacity:0}}
-@media (prefers-reduced-motion:reduce){#splash .mag,#splash div{animation:none}#splash{transition:none}}
+@media (prefers-reduced-motion:reduce){#splash .face,#splash div{animation:none}#splash{transition:none}}
 #q{font:inherit;font-size:16px;width:100%;padding:11px 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--fg);outline:none}
 #q:focus{border-color:var(--ink)}
 .next{cursor:pointer}
@@ -139,8 +143,8 @@ li.row.flash{animation:flash 1.6s ease-out}
 </style>
 </head>
 <body>
-<div id="splash" aria-hidden="true"><svg class="mag" viewBox="0 0 120 120"><circle cx="50" cy="50" r="30" fill="rgba(255,255,255,.08)" stroke="#fff" stroke-width="9"/><path d="M72 72l26 26" stroke="#fff" stroke-width="13" stroke-linecap="round"/><path d="M36 42a16 16 0 0 1 12-12" stroke="rgba(255,255,255,.75)" stroke-width="5" fill="none" stroke-linecap="round"/></svg><div>Conan Tracker</div></div>
-<div class="appbar" dir="rtl"><b>متابعة كونان</b><span id="pct2" dir="ltr"></span><button class="refresh" id="refresh" aria-label="تحديث الصفحة" title="تحديث"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg></button></div>
+<div id="splash" aria-hidden="true"><div class="face" id="face"></div><div>Conan Tracker</div></div>
+<div class="appbar" dir="rtl"><b>متابعة كونان</b><span id="pct2" dir="ltr"></span><button class="refresh" id="searchBtn" aria-label="بحث" title="بحث"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L20 20"/></svg></button><button class="refresh" id="refresh" aria-label="تحديث الصفحة" title="تحديث"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg></button><div class="sb" id="sb" hidden><input id="q" type="search" placeholder="ابحث برقم الحلقة أو اسمها أو شخصية" autocomplete="off" enterkeyhint="search"></div></div>
 <div class="wrap" dir="rtl" lang="ar">
   <header>
     <div class="top">
@@ -160,13 +164,19 @@ li.row.flash{animation:flash 1.6s ease-out}
     <div class="legend" id="legend"></div>
   </div>
 
-  <input id="q" type="search" placeholder="ابحث برقم الحلقة أو اسمها أو شخصية" autocomplete="off" enterkeyhint="search">
   <ol id="list"></ol>
   <p class="status" id="status"></p>
 </div>
 
 <script>
-(function(){const s=document.getElementById("splash");let seen=false;
+(function(){const s=document.getElementById("splash");
+  const SPL=[["#4a78c8","#1f3c78"],["#3b4f7a","#172238"],["#e2708a","#9c2f4c"],["#c48a4a","#7a4a1c"],["#e9a65a","#b0602a"],["#5aa36e","#2b6a3e"],["#8a2b3a","#2a0c12"],["#9b7fd0","#4f3388"],["#e8894a","#a24a1a"],["#4fb0c0","#1d6676"],["#d5568f","#8a1f55"],["#d6ad3e","#8f6a10"],["#6c7a8f","#2c3646"],["#c0392b","#6e1610"]];
+  let last=-1; try{last=+localStorage.getItem("lastFace")}catch(e){}
+  let k=Math.floor(Math.random()*SPL.length); if(k===last) k=(k+1+Math.floor(Math.random()*(SPL.length-1)))%SPL.length;
+  try{localStorage.setItem("lastFace",k)}catch(e){}
+  s.style.background="linear-gradient("+SPL[k][0]+","+SPL[k][1]+")";
+  const f=document.getElementById("face"); f.style.backgroundPosition=((k%7)/6*100)+"% "+(Math.floor(k/7)*100)+"%";
+  let seen=false;
   try{seen=sessionStorage.getItem("splashed")==="1";sessionStorage.setItem("splashed","1")}catch(e){}
   if(seen){s.remove();return}
   setTimeout(()=>{s.classList.add("hide");setTimeout(()=>s.remove(),500)},1300);
@@ -210,7 +220,7 @@ function render(){
   const nx=DATA.find(d=>!watched[d.id]);
   const lastDone=Object.entries(watched).sort((a,b)=>a[1]<b[1]?1:-1)[0];
   document.getElementById("next").innerHTML = nx
-    ? `<span class="lbl">التالية</span><b dir="ltr">${nx.id}</b><bdi dir="ltr">${nx.t}</bdi>`+(lastDone?`<span class="lbl" style="margin-inline-start:auto">آخر تشييك: ${fmt(lastDone[1])}</span>`:"")
+    ? `<span class="lbl">التالية</span><b dir="ltr">${nx.id}</b><bdi dir="ltr">${shortTitle(nx.t)}</bdi>`+(lastDone?`<span class="lbl" style="margin-inline-start:auto">آخر تشييك: ${fmt(lastDone[1])}</span>`:"")
     : `<b>خلّصت القائمة كلها 🎉</b>`;
   const ac=document.getElementById("arcs"); ac.innerHTML="";
   const mk=(label,val,ci,n)=>{const b=document.createElement("button");b.className="chip";if(ci!=null)b.style.setProperty("--c",`var(--a${ci})`);
@@ -273,6 +283,7 @@ async function pull(){
     status("القائمة مشتركة، وأي تشييك يظهر للكل.");
   }catch(e){status("ما قدرت أجيب آخر تحديث، المعروض هو آخر نسخة في هالمتصفح.")}
 }
+function shortTitle(s){if(s.length<=36)return s;let o="";for(const w of s.split(" ")){if((o+" "+w).trim().length>34)break;o=(o+" "+w).trim()}return o+"…"}
 function matchQ(d){
   let q=(document.getElementById("q")?.value||"").trim().toLowerCase().replace(/[٠-٩]/g,c=>c.charCodeAt(0)-1632);
   if(!q) return true;
@@ -356,6 +367,11 @@ pull(); setInterval(pull,8000);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)pull()});
 if("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(()=>{});
 document.getElementById("q").addEventListener("input",()=>render());
+document.getElementById("searchBtn").onclick=()=>{
+  const sb=document.getElementById("sb"), q=document.getElementById("q");
+  sb.hidden=!sb.hidden; document.getElementById("searchBtn").classList.toggle("on",!sb.hidden);
+  if(sb.hidden){ if(q.value){q.value="";render()} } else q.focus();
+};
 document.getElementById("next").onclick=jumpNext;
 document.getElementById("refresh").onclick=async e=>{
   const b=e.currentTarget; b.classList.add("spin");
