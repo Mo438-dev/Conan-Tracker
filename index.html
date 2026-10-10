@@ -176,8 +176,9 @@ li.row.flash{animation:flash 1.6s ease-out}
   let k=Math.floor(Math.random()*n); if(n>1&&k===last) k=(k+1+Math.floor(Math.random()*(n-1)))%n;
   try{localStorage.setItem("lastFace",k)}catch(e){}
   k=IDX[k]??0;
-  const hue=Math.round((k*137.508+215)%360);
-  s.style.background="linear-gradient(hsl("+hue+",55%,58%),hsl("+hue+",60%,26%))";
+  const COL={1:["#4f86d9","#1f4590"],2:["#3d5a94","#16264d"],3:["#ee88a6","#b03a62"],4:["#4c9a9e","#1d5357"],5:["#f09a86","#b9503f"],6:["#8299b3","#3f546c"],7:["#7a1f2c","#1a080b"],8:["#c9566b","#7a1f33"],9:["#f0a058","#b85a1c"],10:["#7f9a4a","#3e5320"],11:["#f06a52","#b02a1f"],15:["#9a7cc9","#4f3387"],20:["#5a5e66","#1f2126"],23:["#3c5a48","#0f1d15"],25:["#4fc0bd","#17716e"],26:["#d8c39a","#8f7650"],28:["#b04a86","#5c1844"],29:["#f1c552","#b3861a"]};
+  const c=COL[k+1]||["#4676c4","#223e78"];
+  s.style.background="linear-gradient("+c[0]+","+c[1]+")";
   if(F[k]) document.getElementById("face").innerHTML='<svg viewBox="0 0 400 400" width="100%" height="100%"><path fill="#fff" fill-rule="evenodd" d="'+F[k][0]+'"/><path fill="#15161e" fill-rule="evenodd" d="'+F[k][0]+F[k][1]+'"/></svg>';
   let seen=false;
   try{seen=sessionStorage.getItem("splashed")==="1";sessionStorage.setItem("splashed","1")}catch(e){}
