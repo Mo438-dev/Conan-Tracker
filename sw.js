@@ -1,5 +1,5 @@
 // App shell cache so the home-screen app opens instantly and works offline (checks still need internet)
-const CACHE = 'conan-v1';
+const CACHE = 'conan-v2';
 const SHELL = ['/', '/manifest.webmanifest', '/icon-192.png', '/icon-512.png', '/apple-touch-icon.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL))); self.skipWaiting(); });
 self.addEventListener('activate', e => {
