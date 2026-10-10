@@ -114,7 +114,7 @@ button{touch-action:manipulation;-webkit-user-select:none;user-select:none}
 .top h1{display:none}
 .wrap{padding-bottom:calc(60px + env(safe-area-inset-bottom,0px))}
 #splash{position:fixed;inset:0;z-index:50;background:linear-gradient(#4676c4,#223e78);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;color:#fff;transition:opacity .45s ease,visibility .45s}
-#splash .face{width:176px;height:176px;filter:drop-shadow(0 12px 22px rgba(0,0,0,.35));animation:facein .7s cubic-bezier(.2,.9,.3,1.35) both}
+#splash .face{width:176px;height:176px;animation:facein .7s cubic-bezier(.2,.9,.3,1.35) both}
 @keyframes facein{0%{transform:scale(.4) rotate(-12deg);opacity:0}60%{transform:scale(1.06) rotate(3deg);opacity:1}100%{transform:none}}
 #splash div{font-family:var(--f-ui);font-weight:700;font-size:1.5rem;letter-spacing:.02em;animation:fadeup .6s .15s both}
 #splash.hide{opacity:0;visibility:hidden}
