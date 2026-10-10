@@ -114,7 +114,7 @@ button{touch-action:manipulation;-webkit-user-select:none;user-select:none}
 .top h1{display:none}
 .wrap{padding-bottom:calc(60px + env(safe-area-inset-bottom,0px))}
 #splash{position:fixed;inset:0;z-index:50;background:linear-gradient(#4676c4,#223e78);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;color:#fff;transition:opacity .45s ease,visibility .45s}
-#splash .face{width:156px;height:156px;background:url(/faces.png) no-repeat;background-size:700% 200%;filter:drop-shadow(0 12px 22px rgba(0,0,0,.35));animation:facein .7s cubic-bezier(.2,.9,.3,1.35) both}
+#splash .face{width:176px;height:176px;filter:drop-shadow(0 12px 22px rgba(0,0,0,.35));animation:facein .7s cubic-bezier(.2,.9,.3,1.35) both}
 @keyframes facein{0%{transform:scale(.4) rotate(-12deg);opacity:0}60%{transform:scale(1.06) rotate(3deg);opacity:1}100%{transform:none}}
 #splash div{font-family:var(--f-ui);font-weight:700;font-size:1.5rem;letter-spacing:.02em;animation:fadeup .6s .15s both}
 #splash.hide{opacity:0;visibility:hidden}
@@ -168,14 +168,16 @@ li.row.flash{animation:flash 1.6s ease-out}
   <p class="status" id="status"></p>
 </div>
 
+<script src="/faces.js"></script>
 <script>
 (function(){const s=document.getElementById("splash");
-  const SPL=[["#4a78c8","#1f3c78"],["#3b4f7a","#172238"],["#e2708a","#9c2f4c"],["#c48a4a","#7a4a1c"],["#e9a65a","#b0602a"],["#5aa36e","#2b6a3e"],["#8a2b3a","#2a0c12"],["#9b7fd0","#4f3388"],["#e8894a","#a24a1a"],["#4fb0c0","#1d6676"],["#d5568f","#8a1f55"],["#d6ad3e","#8f6a10"],["#6c7a8f","#2c3646"],["#c0392b","#6e1610"]];
+  const F=window.FACES||[], n=F.length||1;
   let last=-1; try{last=+localStorage.getItem("lastFace")}catch(e){}
-  let k=Math.floor(Math.random()*SPL.length); if(k===last) k=(k+1+Math.floor(Math.random()*(SPL.length-1)))%SPL.length;
+  let k=Math.floor(Math.random()*n); if(n>1&&k===last) k=(k+1+Math.floor(Math.random()*(n-1)))%n;
   try{localStorage.setItem("lastFace",k)}catch(e){}
-  s.style.background="linear-gradient("+SPL[k][0]+","+SPL[k][1]+")";
-  const f=document.getElementById("face"); f.style.backgroundPosition=((k%7)/6*100)+"% "+(Math.floor(k/7)*100)+"%";
+  const hue=Math.round((k*137.508+215)%360);
+  s.style.background="linear-gradient(hsl("+hue+",55%,58%),hsl("+hue+",60%,26%))";
+  if(F[k]) document.getElementById("face").innerHTML='<svg viewBox="0 0 400 400" width="100%" height="100%"><path fill="#fff" fill-rule="evenodd" d="'+F[k][0]+'"/><path fill="#15161e" fill-rule="evenodd" d="'+F[k][0]+F[k][1]+'"/></svg>';
   let seen=false;
   try{seen=sessionStorage.getItem("splashed")==="1";sessionStorage.setItem("splashed","1")}catch(e){}
   if(seen){s.remove();return}
