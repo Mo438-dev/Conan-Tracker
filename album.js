@@ -81,29 +81,34 @@ const css=`
 .acard.lock{background:var(--surface);color:var(--muted);border:1.5px dashed var(--line);box-shadow:none}
 .acard.lock .fc{color:color-mix(in oklab,var(--fg) 13%,transparent)}
 .acard.lock .q{font-family:var(--f-head);font-size:2.6rem;line-height:1;color:color-mix(in oklab,var(--fg) 22%,transparent);margin:auto}
-.acard.lock .nm{font-family:var(--f-num);letter-spacing:.1em}
+.acard.lock .nm,.acard.org.lock .nm{font-family:var(--f-num);font-size:.84rem;letter-spacing:.1em;color:inherit}
+.acard,#acardBig .bcard{text-shadow:0 1px 3px rgba(0,0,0,.35)}
+.acard.lock{text-shadow:none}
+#acardBig .sx.on{text-shadow:none}
 .acard .sec{position:absolute;top:6px;inset-inline-start:6px;width:20px;height:20px;border-radius:6px;background:rgba(0,0,0,.35);display:grid;place-items:center}
 .acard .sec svg{width:12px;height:12px}
 .acard .sec.on{background:#e9c46a;color:#1b1b1b}
 .acard .nw{position:absolute;top:6px;inset-inline-end:6px;background:#ff5a5f;color:#fff;font-size:.62rem;font-weight:700;border-radius:5px;padding:1px 5px}
 @keyframes cardin{from{transform:translateY(8px) scale(.96);opacity:0}}
 #acardBig{position:fixed;inset:0;z-index:35;display:grid;place-items:center;background:rgba(10,12,18,.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);padding:24px;animation:fadein .25s both}
-#acardBig .big{width:min(300px,86vw);border-radius:22px;padding:22px 18px 20px;color:#fff;text-align:center;background:linear-gradient(160deg,var(--c0),var(--c1));box-shadow:0 30px 70px rgba(0,0,0,.45);display:grid;gap:8px;justify-items:center;animation:bigin .45s cubic-bezier(.2,.9,.3,1.25) both}
-#acardBig .big.org{--c0:#2a2c36;--c1:#0b0c10;border:1px solid #c9a24a88}
+#acardBig .bcard{width:min(300px,86vw);border-radius:22px;padding:22px 18px 20px;color:#fff;text-align:center;background:linear-gradient(160deg,var(--c0),var(--c1));box-shadow:0 30px 70px rgba(0,0,0,.45);display:grid;gap:8px;justify-items:center;animation:bigin .45s cubic-bezier(.2,.9,.3,1.25) both}
+#acardBig .bcard.org{--c0:#2a2c36;--c1:#0b0c10;border:1px solid #c9a24a88}
 #acardBig .fc{width:62%;aspect-ratio:1}
 #acardBig .fc svg{width:100%;height:100%}
 #acardBig .fc.gl{width:40%;color:#e9c46a}
 #acardBig h3{margin:0;font-family:var(--f-head);font-size:2rem;line-height:1.1}
 #acardBig .org h3{color:#e9c46a}
+#acardBig .bcard .ep.hd{font-size:.9rem;opacity:1}
 #acardBig .en{direction:ltr;opacity:.75;font-size:.85rem}
 #acardBig p{margin:0;font-size:.95rem;line-height:1.6}
 #acardBig .sx{margin-top:4px;padding:8px 12px;border-radius:12px;background:rgba(0,0,0,.28);font-size:.88rem;display:flex;gap:8px;align-items:center;justify-content:center}
 #acardBig .sx.on{background:#e9c46a;color:#1b1b1b;font-weight:600}
 #acardBig .sx svg{width:15px;height:15px;flex:none}
-#acardBig .ep{font-family:var(--f-num);font-size:.75rem;opacity:.8;direction:ltr}
+#acardBig .ep{font-size:.8rem;opacity:.85}
+#acardBig .ep span,#acardBig .sx b{font-family:var(--f-num);direction:ltr;unicode-bidi:isolate}
 @keyframes bigin{from{transform:scale(.6) rotate(-6deg);opacity:0}}
 @keyframes fadein{from{opacity:0}}
-@media (prefers-reduced-motion:reduce){#album{transition:none}.acard,#acardBig,#acardBig .big{animation:none}}
+@media (prefers-reduced-motion:reduce){#album{transition:none}.acard,#acardBig,#acardBig .bcard{animation:none}}
 `;
 const st=document.createElement("style");st.textContent=css;document.head.appendChild(st);
 
@@ -131,7 +136,7 @@ function drawGrid(){
       const fc=c.f?'<div class="fc">'+faceSVG(c.f)+'</div>':'<div class="fc gl">'+GLASS+'</div>';
       const sec=c.s?'<span class="sec'+(isOpen(c.su)?' on':'')+'">'+(isOpen(c.su)?'✦':LOCK)+'</span>':"";
       const nw=(fresh.has(c.k)||fresh.has(c.k+":s"))?'<span class="nw">جديد</span>':"";
-      b.innerHTML=sec+nw+fc+'<div class="nm">'+c.n+'</div>'+(c.g==="o"?'<div class="en">'+c.en+'</div>':'<div class="ep">'+epLabel(c.u)+'</div>');
+      b.innerHTML=sec+nw+fc+'<div class="nm">'+c.n+'</div>'+(c.g==="o"?'<div class="en">'+c.en+'</div>':'<div class="ep">E'+c.u+'</div>');
       b.onclick=()=>showBig(c);
     }else{
       const fc=(c.g==="c"&&c.f)?'<div class="fc">'+faceSVG(c.f,"sil")+'</div>':'<div class="q">؟</div>';
@@ -148,7 +153,7 @@ function showBig(c){
   const fc=c.f?'<div class="fc">'+faceSVG(c.f)+'</div>':'<div class="fc gl">'+GLASS+'</div>';
   let sx="";
   if(c.s) sx=isOpen(c.su)?'<div class="sx on">✦ '+c.s+'</div>':'<div class="sx">'+LOCK+'<span>فيه سر ينكشف مع <b dir="ltr">'+epLabel(c.su)+'</b></span></div>';
-  w.innerHTML='<div class="big'+(c.g==="o"?" org":"")+'" style="--c0:'+cc[0]+';--c1:'+cc[1]+'">'+fc+'<h3>'+c.n+'</h3><div class="en">'+c.en+'</div><p>'+c.d+'</p>'+sx+'<div class="ep">'+(c.g==="o"?"انكشف في ":"أول ظهور ")+epLabel(c.u)+'</div></div>';
+  w.innerHTML='<div class="bcard'+(c.g==="o"?" org":"")+'" style="--c0:'+cc[0]+';--c1:'+cc[1]+'">'+fc+'<h3>'+c.n+'</h3><div class="en">'+c.en+'</div><p>'+c.d+'</p>'+sx+'<div class="ep">'+(c.g==="o"?"انكشف في ":"أول ظهور ")+'<span>E'+c.u+'</span></div></div>';
   w.onclick=()=>w.remove(); document.body.appendChild(w);
 }
 function openAlbum(){
@@ -174,7 +179,7 @@ function unlockPop(c,isSecret){
     confetti(c.g==="o"?["#e9c46a","#ffffff","#2a2c36"]:[cc[0],"#ffd34d","#ffffff"],140);
     const w=document.createElement("div");w.id="acardBig";w.dir="rtl";
     const fc=c.f?'<div class="fc">'+faceSVG(c.f)+'</div>':'<div class="fc gl">'+GLASS+'</div>';
-    w.innerHTML='<div class="big'+(c.g==="o"?" org":"")+'" style="--c0:'+cc[0]+';--c1:'+cc[1]+'"><div class="ep" style="font-family:var(--f-ui);font-size:.9rem;opacity:1">'+(isSecret?"🔓 انكشف سر!":"🃏 كرت جديد انفتح")+'</div>'+fc+'<h3>'+c.n+'</h3><div class="en">'+c.en+'</div>'+(isSecret?'<div class="sx on">✦ '+c.s+'</div>':'<p>'+c.d+'</p>')+'</div>';
+    w.innerHTML='<div class="bcard'+(c.g==="o"?" org":"")+'" style="--c0:'+cc[0]+';--c1:'+cc[1]+'"><div class="ep hd">'+(isSecret?"🔓 انكشف سر!":"🃏 كرت جديد انفتح")+'</div>'+fc+'<h3>'+c.n+'</h3><div class="en">'+c.en+'</div>'+(isSecret?'<div class="sx on">✦ '+c.s+'</div>':'<p>'+c.d+'</p>')+'</div>';
     w.onclick=()=>w.remove(); document.body.appendChild(w);
     setTimeout(()=>w.remove(),5200);
   },650);
