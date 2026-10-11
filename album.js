@@ -3,43 +3,73 @@
    (or, if that episode isn't in the list, the next entry after it). */
 (function(){
 const CARDS=[
- // g:'c' characters, g:'o' Black Organization. f = face number in faces.js, u = unlock episode, s/su = secret line and its episode
- {k:"conan",g:"c",f:1,n:"كونان إدوغاوا",en:"Conan Edogawa",u:1,d:"المحقق الصغير بنظارة وببيونة"},
- {k:"shinichi",g:"c",f:2,n:"شينتشي كودو",en:"Shinichi Kudo",u:1,d:"محقق الثانوية المشهور… قبل ما يصغر"},
- {k:"ran",g:"c",f:3,n:"ران موري",en:"Ran Mouri",u:1,d:"صديقة طفولة شينتشي وبطلة كاراتيه"},
- {k:"kogoro",g:"c",f:6,n:"كوغورو موري",en:"Kogoro Mouri",u:1,d:"أبو ران، المحقق النايم"},
- {k:"agasa",g:"c",f:9,n:"البروفيسور أغاسا",en:"Hiroshi Agasa",u:1,d:"جار شينتشي ومخترع أدوات كونان"},
- {k:"culprit",g:"c",f:7,n:"الجاني",en:"The Culprit",u:1,d:"الظل الأسود اللي يطلع بكل قضية"},
- {k:"sonoko",g:"c",f:29,n:"سونوكو سوزوكي",en:"Sonoko Suzuki",u:6,d:"صديقة ران المقرّبة، بنت عائلة سوزوكي"},
- {k:"eri",g:"c",f:15,n:"إيري كيساكي",en:"Eri Kisaki",u:32,d:"أم ران، المحامية اللي ما تخسر قضية"},
- {k:"yusaku",g:"c",f:4,n:"يوساكو كودو",en:"Yusaku Kudo",u:43,d:"أبو شينتشي، كاتب روايات بوليسية عالمي"},
- {k:"yukiko",g:"c",f:5,n:"يوكيكو كودو",en:"Yukiko Kudo",u:43,d:"أم شينتشي، ممثلة سابقة وأستاذة تنكّر"},
- {k:"heiji",g:"c",f:10,n:"هيجي هاتوري",en:"Heiji Hattori",u:48,d:"محقق الغرب من أوساكا"},
- {k:"kazuha",g:"c",f:11,n:"كازوها توياما",en:"Kazuha Toyama",u:118,d:"صديقة طفولة هيجي"},
- {k:"haibara",g:"c",f:8,n:"آي هايبارا",en:"Ai Haibara",u:129,d:"طالبة جديدة بالفصل… جاية من المنظمة"},
- {k:"akai",g:"c",f:23,n:"شويتشي أكاي",en:"Shuichi Akai",u:230,d:"رجل غامض بنظرة حادة",s:"عميل FBI، وأخطر عدو للمنظمة",su:345},
- {k:"matsuda",g:"c",f:20,n:"جينبي ماتسودا",en:"Jinpei Matsuda",u:301,d:"خبير تفكيك متفجرات بالشرطة"},
- {k:"subaru",g:"c",f:26,n:"سوبارو أوكيا",en:"Subaru Okiya",u:509,d:"طالب دراسات عليا ساكن ببيت شينتشي",s:"هو نفسه شويتشي أكاي متنكّر",su:783},
- {k:"sera",g:"c",f:25,n:"ماسومي سيرا",en:"Masumi Sera",u:646,d:"محققة ثانوية بأسلوب صبياني",s:"أخت شويتشي أكاي الصغيرة",su:701},
+ // g:'c' characters, g:'o' Black Organization. f = face key in faces2.js, u = unlock episode, s/su = secret line and its episode
+ {k:"conan",g:"c",f:"conan",n:"كونان إدوغاوا",en:"Conan Edogawa",u:1,d:"المحقق الصغير بنظارة وببيونة"},
+ {k:"shinichi",g:"c",f:"shinichi",n:"شينتشي كودو",en:"Shinichi Kudo",u:1,d:"محقق الثانوية المشهور… قبل ما يصغر"},
+ {k:"ran",g:"c",f:"ran",n:"ران موري",en:"Ran Mouri",u:1,d:"صديقة طفولة شينتشي وبطلة كاراتيه"},
+ {k:"kogoro",g:"c",f:"kogoro",n:"كوغورو موري",en:"Kogoro Mouri",u:1,d:"أبو ران، المحقق النايم"},
+ {k:"agasa",g:"c",f:"agasa",n:"البروفيسور أغاسا",en:"Hiroshi Agasa",u:1,d:"جار شينتشي ومخترع أدوات كونان"},
+ {k:"megure",g:"c",f:"megure",n:"المفتش ميغوري",en:"Juzo Megure",u:1,d:"رئيس قسم التحقيقات بقبعته اللي ما تنشال"},
+ {k:"ayumi",g:"c",f:"ayumi",n:"أيومي يوشيدا",en:"Ayumi Yoshida",u:1,d:"من فريق المتحرين الصغار"},
+ {k:"genta",g:"c",f:"genta",n:"غينتا كوجيما",en:"Genta Kojima",u:1,d:"قائد المتحرين الصغار… وعاشق الأونيغيري"},
+ {k:"mitsuhiko",g:"c",f:"mitsuhiko",n:"ميتسوهيكو تسوبورايا",en:"Mitsuhiko Tsuburaya",u:1,d:"عقل المتحرين الصغار"},
+ {k:"culprit",g:"c",f:"culprit",n:"الجاني",en:"The Culprit",u:1,d:"الظل الأسود اللي يطلع بكل قضية"},
+ {k:"sonoko",g:"c",f:"sonoko",n:"سونوكو سوزوكي",en:"Sonoko Suzuki",u:6,d:"صديقة ران المقرّبة، بنت عائلة سوزوكي"},
+ {k:"eri",g:"c",f:"eri",n:"إيري كيساكي",en:"Eri Kisaki",u:32,d:"أم ران، المحامية اللي ما تخسر قضية"},
+ {k:"yusaku",g:"c",f:"yusaku",n:"يوساكو كودو",en:"Yusaku Kudo",u:43,d:"أبو شينتشي، كاتب روايات بوليسية عالمي"},
+ {k:"yukiko",g:"c",f:"yukiko",n:"يوكيكو كودو",en:"Yukiko Kudo",u:43,d:"أم شينتشي، ممثلة سابقة وأستاذة تنكّر"},
+ {k:"heiji",g:"c",f:"heiji",n:"هيجي هاتوري",en:"Heiji Hattori",u:48,d:"محقق الغرب من أوساكا"},
+ {k:"takagi",g:"c",f:"takagi",n:"واتارو تاكاغي",en:"Wataru Takagi",u:66,d:"المحقق الطيب اللي قلبه مع ساتو"},
+ {k:"nakamori",g:"c",f:"nakamori",n:"المفتش ناكاموري",en:"Ginzo Nakamori",u:76,d:"مطارد كايتو كيد اللي ما يستسلم"},
+ {k:"kid",g:"c",f:"kid",n:"كايتو كيد",en:"Kaitou Kid",u:76,d:"اللص الشبح بالقبعة والمونوكل"},
+ {k:"kobayashi",g:"c",f:"kobayashi",n:"سوميكو كوباياشي",en:"Sumiko Kobayashi",u:112,d:"معلمة كونان بالمدرسة"},
+ {k:"kazuha",g:"c",f:"kazuha",n:"كازوها توياما",en:"Kazuha Toyama",u:118,d:"صديقة طفولة هيجي"},
+ {k:"haibara",g:"c",f:"haibara",n:"آي هايبارا",en:"Ai Haibara",u:129,d:"طالبة جديدة بالفصل… جاية من المنظمة"},
+ {k:"sato",g:"c",f:"sato",n:"ميواكو ساتو",en:"Miwako Sato",u:130,d:"محققة شجاعة، نجمة قسم الشرطة"},
+ {k:"chiba",g:"c",f:"chiba",n:"كازونوبو تشيبا",en:"Kazunobu Chiba",u:138,d:"محقق بالشرطة يحب الأكل"},
+ {k:"shiratori",g:"c",f:"shiratori",n:"نينزابورو شيراتوري",en:"Ninzaburo Shiratori",u:146,d:"المفتش الغني، منافس تاكاغي"},
+ {k:"yumi",g:"c",f:"yumi",n:"يومي مياموتو",en:"Yumi Miyamoto",u:146,d:"شرطية مرور وصديقة ساتو"},
+ {k:"makoto",g:"c",f:"makoto",n:"ماكوتو كيوغوكو",en:"Makoto Kyogoku",u:153,d:"بطل الكاراتيه اللي ما ينهزم، حبيب سونوكو"},
+ {k:"jodie",g:"c",f:"jodie",n:"جودي ستارلينغ",en:"Jodie Starling",u:226,d:"معلمة إنجليزي مرحة",s:"عميلة FBI تطارد فيرموث",su:345},
+ {k:"akai",g:"c",f:"akai",n:"شويتشي أكاي",en:"Shuichi Akai",u:230,d:"رجل غامض بنظرة حادة",s:"عميل FBI، وأخطر عدو للمنظمة",su:345},
+ {k:"james",g:"c",f:"james",n:"جيمس بلاك",en:"James Black",u:258,d:"رجل إنجليزي هادي",s:"رئيس فريق الـFBI في اليابان",su:345},
+ {k:"matsuda",g:"c",f:"matsuda",n:"جينبي ماتسودا",en:"Jinpei Matsuda",u:301,d:"خبير تفكيك متفجرات بالشرطة"},
+ {k:"hagiwara",g:"c",f:"hagiwara",n:"كينجي هاغيوارا",en:"Kenji Hagiwara",u:304,d:"خبير متفجرات وصديق ماتسودا"},
+ {k:"camel",g:"c",f:"camel",n:"أندريه كاميل",en:"Andre Camel",u:497,d:"عميل FBI ضخم وسوّاق محترف"},
+ {k:"subaru",g:"c",f:"subaru",n:"سوبارو أوكيا",en:"Subaru Okiya",u:509,d:"طالب دراسات عليا ساكن ببيت شينتشي",s:"هو نفسه شويتشي أكاي متنكّر",su:783},
+ {k:"kansuke",g:"c",f:"kansuke",n:"كانسوكي ياماتو",en:"Kansuke Yamato",u:516,d:"مفتش شرطة ناغانو بعين وحدة"},
+ {k:"yui",g:"c",f:"yui",n:"يوي أويهارا",en:"Yui Uehara",u:516,d:"مساعدة ياماتو بشرطة ناغانو"},
+ {k:"komei",g:"c",f:"komei",n:"تاكاآكي موروفوشي",en:"Taka'aki Morofushi",u:558,d:"كومي، العبقري الهادي بشرطة ناغانو"},
+ {k:"naeko",g:"c",f:"naeko",n:"نايكو ميكي",en:"Naeko Miike",u:624,d:"شرطية مرور، حب تشيبا الأول"},
+ {k:"sera",g:"c",f:"sera",n:"ماسومي سيرا",en:"Masumi Sera",u:646,d:"محققة ثانوية بأسلوب صبياني",s:"أخت شويتشي أكاي الصغيرة",su:701},
+ {k:"amuro",g:"c",f:"amuro",n:"تورو أمورو",en:"Toru Amuro",u:667,d:"محقق ونادل بكافيه بوارو",s:"عضو بالمنظمة باسم بوربون",su:701},
+ {k:"date",g:"c",f:"date",n:"واتارو داتي",en:"Wataru Date",u:681,d:"محقق بالشرطة وأستاذ تاكاغي"},
+ {k:"haneda",g:"c",f:"haneda",n:"شوكيتشي هانيدا",en:"Shukichi Haneda",u:731,d:"بطل الشوغي العبقري"},
+ {k:"mary",g:"c",f:"mary",n:"ماري سيرا",en:"Mary Sera",u:754,d:"البنت الغامضة اللي ساكنة مع سيرا"},
+ {k:"rumi",g:"c",f:"rumi",n:"رومي واكاسا",en:"Rumi Wakasa",u:889,d:"المعلمة الجديدة الغامضة"},
+ {k:"kazami",g:"c",f:"kazami",n:"يويا كازامي",en:"Yuya Kazami",u:925,d:"مساعد فورويا بالأمن العام"},
+ {k:"momiji",g:"c",f:"momiji",n:"موميجي أوكا",en:"Momiji Ooka",u:1024,d:"محققة من كيوتو، منافسة كازوها على هيجي"},
+ {k:"muga",g:"c",f:"muga",n:"إيوري موغا",en:"Iori Muga",u:1024,d:"خادم موميجي المخلص"},
 
- {k:"gin",g:"o",n:"جن",en:"Gin",u:1,d:"القاتل البارد اللي سقى شينتشي السم"},
- {k:"vodka",g:"o",n:"فودكا",en:"Vodka",u:1,d:"ظل جن الدائم"},
- {k:"tequila",g:"o",n:"تيكيلا",en:"Tequila",u:54,d:"عضو ضخم جاي يستلم بيانات"},
- {k:"akemi",g:"o",n:"أكيمي ميانو",en:"Akemi Miyano",u:128,d:"عضوة بلا اسم حركي، نفّذت سرقة المليار ين",s:"أخت شيري الكبيرة",su:129},
- {k:"sherry",g:"o",f:8,n:"شيري",en:"Sherry",u:129,d:"صانعة السم APTX 4869… هي آي هايبارا"},
- {k:"pisco",g:"o",n:"بيسكو",en:"Pisco",u:176,d:"عضو قديم بواجهة رجل أعمال"},
- {k:"vermouth",g:"o",n:"فيرموث",en:"Vermouth",u:176,d:"سيدة الأسرار والتنكّر",s:"هي الممثلة شارون فينيارد، وبنفس الوقت كريس",su:345},
- {k:"calvados",g:"o",n:"كالفادوس",en:"Calvados",u:345,d:"قنّاص مخلص لفيرموث"},
- {k:"chianti",g:"o",n:"كيانتي",en:"Chianti",u:425,d:"قنّاصة بوشم فراشة"},
- {k:"korn",g:"o",n:"كورن",en:"Korn",u:425,d:"قنّاص هادي، شريك كيانتي"},
- {k:"kir",g:"o",f:28,n:"كير",en:"Kir",u:425,d:"مذيعة الأخبار رينا ميزوناشي",s:"عميلة CIA مزروعة: هيدمي هوندو",su:500},
- {k:"rye",g:"o",f:23,n:"راي",en:"Rye",u:500,d:"الاسم الحركي لشويتشي أكاي لما اخترق المنظمة"},
- {k:"bourbon",g:"o",n:"بوربون",en:"Bourbon",u:701,d:"تورو أمورو، المحقق اللي يشتغل بالكافيه",s:"شرطي أمن عام متخفّي: ري فورويا (زيرو)",su:783},
- {k:"scotch",g:"o",n:"سكوتش",en:"Scotch",u:783,d:"عضو سابق انكشف إنه جاسوس",s:"هيروميتسو موروفوشي، صديق طفولة فورويا",su:983},
- {k:"boss",g:"o",n:"الزعيم",en:"The Boss",u:942,d:"رأس المنظمة: رينيا كاراسوما"},
- {k:"rum",g:"o",n:"رم",en:"Rum",u:1079,d:"الرجل الثاني بالمنظمة: كانينوري واكيتا"}
+ {k:"gin",g:"o",f:"gin",n:"جين",en:"Gin",u:1,d:"القاتل البارد اللي سقى شينتشي السم"},
+ {k:"vodka",g:"o",f:"vodka",n:"فودكا",en:"Vodka",u:1,d:"ظل جين الدائم"},
+ {k:"tequila",g:"o",f:"tequila",n:"تيكيلا",en:"Tequila",u:54,d:"عضو ضخم جاي يستلم بيانات"},
+ {k:"akemi",g:"o",f:"akemi",n:"أكيمي ميانو",en:"Akemi Miyano",u:128,d:"عضوة بلا اسم حركي، نفّذت سرقة المليار ين",s:"أخت شيري الكبيرة",su:129},
+ {k:"sherry",g:"o",f:"haibara",n:"شيري",en:"Sherry",u:129,d:"صانعة السم APTX 4869… هي آي هايبارا"},
+ {k:"pisco",g:"o",f:"pisco",n:"بيسكو",en:"Pisco",u:176,d:"عضو قديم بواجهة رجل أعمال"},
+ {k:"vermouth",g:"o",f:"vermouth",n:"فيرموث",en:"Vermouth",u:176,d:"سيدة الأسرار والتنكّر",s:"هي الممثلة شارون فينيارد، وبنفس الوقت كريس",su:345},
+ {k:"calvados",g:"o",f:"calvados",n:"كالفادوس",en:"Calvados",u:345,d:"قنّاص مخلص لفيرموث"},
+ {k:"chianti",g:"o",f:"chianti",n:"كيانتي",en:"Chianti",u:425,d:"قنّاصة بوشم فراشة"},
+ {k:"korn",g:"o",f:"korn",n:"كورن",en:"Korn",u:425,d:"قنّاص هادي، شريك كيانتي"},
+ {k:"kir",g:"o",f:"rena",n:"كير",en:"Kir",u:425,d:"مذيعة الأخبار رينا ميزوناشي",s:"عميلة CIA مزروعة: هيدمي هوندو",su:500},
+ {k:"rye",g:"o",f:"akai",n:"راي",en:"Rye",u:500,d:"الاسم الحركي لشويتشي أكاي لما اخترق المنظمة"},
+ {k:"bourbon",g:"o",f:"amuro",n:"بوربون",en:"Bourbon",u:701,d:"تورو أمورو، المحقق اللي يشتغل بالكافيه",s:"شرطي أمن عام متخفّي: ري فورويا (زيرو)",su:783},
+ {k:"scotch",g:"o",f:"hiromitsu",n:"سكوتش",en:"Scotch",u:783,d:"عضو سابق انكشف إنه جاسوس",s:"هيروميتسو موروفوشي، صديق طفولة فورويا",su:983},
+ {k:"boss",g:"o",f:"boss",n:"الزعيم",en:"The Boss",u:942,d:"رأس المنظمة: رينيا كاراسوما"},
+ {k:"rum",g:"o",f:"rum",n:"رم",en:"Rum",u:1079,d:"الرجل الثاني بالمنظمة: كانينوري واكيتا"}
 ];
-const COL={1:["#4f86d9","#1f4590"],2:["#3d5a94","#16264d"],3:["#ee88a6","#b03a62"],4:["#4c9a9e","#1d5357"],5:["#f09a86","#b9503f"],6:["#8299b3","#3f546c"],7:["#7a1f2c","#1a080b"],8:["#c9566b","#7a1f33"],9:["#f0a058","#b85a1c"],10:["#7f9a4a","#3e5320"],11:["#f06a52","#b02a1f"],15:["#9a7cc9","#4f3387"],20:["#5a5e66","#1f2126"],23:["#3c5a48","#0f1d15"],25:["#4fc0bd","#17716e"],26:["#d8c39a","#8f7650"],28:["#b04a86","#5c1844"],29:["#f1c552","#b3861a"]};
+const COL={conan:["#4f86d9","#1f4590"],shinichi:["#3d5a94","#16264d"],ran:["#ee88a6","#b03a62"],yusaku:["#4c9a9e","#1d5357"],yukiko:["#f09a86","#b9503f"],kogoro:["#8299b3","#3f546c"],culprit:["#7a1f2c","#1a080b"],haibara:["#c9566b","#7a1f33"],agasa:["#f0a058","#b85a1c"],heiji:["#7f9a4a","#3e5320"],kazuha:["#f06a52","#b02a1f"],eri:["#9a7cc9","#4f3387"],matsuda:["#5a5e66","#1f2126"],akai:["#3c5a48","#0f1d15"],sera:["#4fc0bd","#17716e"],subaru:["#c9ad7e","#7d6440"],rena:["#b04a86","#5c1844"],sonoko:["#f1c552","#b3861a"],
+ megure:["#b08354","#6b4523"],ayumi:["#f39bb4","#c2507a"],genta:["#e0614f","#9c2f22"],mitsuhiko:["#6fb58a","#2f7048"],takagi:["#6a7fa8","#2f3f63"],kid:["#8fa9d6","#3e5b93"],kobayashi:["#d9718f","#93324f"],sato:["#a46cc4","#5d2c7d"],chiba:["#9aa65a","#5b6524"],shiratori:["#c9a24a","#86651a"],yumi:["#3f6fb5","#1b3a70"],makoto:["#d08a3e","#8a4f12"],jodie:["#e3b84f","#9e7615"],james:["#7d8a99","#3d4652"],hagiwara:["#5b7c8f","#253c4a"],camel:["#6f8f5a","#33502a"],kansuke:["#8a6a4a","#4a331c"],yui:["#b5739c","#6e3359"],komei:["#3f7f7a","#164543"],naeko:["#4d86c9","#1f4f8a"],amuro:["#d9a441","#8f6312"],date:["#55806a","#22463a"],haneda:["#8c7aa8","#4a3a68"],mary:["#d6c070","#8f7a26"],rumi:["#5e9f7f","#24604a"],kazami:["#6f8a6f","#33493a"],momiji:["#e08d5a","#a04e1f"],nakamori:["#7c8c9e","#3a4757"],muga:["#5a5a7a","#25253f"]};
 const GLASS='<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12h40L32 34z"/><path d="M32 34v18M22 52h20"/><path d="M18 18h28" opacity=".5"/><circle cx="41" cy="9" r="4"/></svg>';
 const LOCK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg>';
 
@@ -50,9 +80,10 @@ function epLabel(ep){const e=entryFor(ep);return e?e.id:"قريباً"}
 function keys(){const o=[];for(const c of CARDS){if(isOpen(c.u)){o.push(c.k);if(c.s&&isOpen(c.su))o.push(c.k+":s")}}return o}
 function getSeen(){try{return JSON.parse(localStorage.getItem("album-seen")||"null")}catch(e){return null}}
 function setSeen(a){try{localStorage.setItem("album-seen",JSON.stringify(a))}catch(e){}}
-function faceSVG(f,mode){const F=(window.FACES||[])[f-1];if(!F)return "";
-  if(mode==="sil")return '<svg viewBox="0 0 400 400"><path fill="currentColor" fill-rule="evenodd" d="'+F[0]+'"/></svg>';
-  return '<svg viewBox="0 0 400 400"><path fill="#fff" fill-rule="evenodd" d="'+F[0]+'"/><path fill="#15161e" fill-rule="evenodd" d="'+F[0]+F[1]+'"/></svg>'}
+function faceSVG(f,mode){const F=(window.FACES2||{})[f];if(!F)return "";
+  if(f==="boss"&&mode!=="sil")return '<svg viewBox="0 0 300 300"><path fill="#e9c46a" fill-rule="evenodd" d="'+F[0]+'"/></svg>';
+  if(mode==="sil")return '<svg viewBox="0 0 300 300"><path fill="currentColor" fill-rule="evenodd" d="'+F[0]+'"/></svg>';
+  return '<svg viewBox="0 0 300 300"><path fill="#fff" fill-rule="evenodd" d="'+F[0]+'"/><path fill="#15161e" fill-rule="evenodd" d="'+F[1]+'"/></svg>'}
 
 const css=`
 #albumBtn{position:relative}
@@ -131,7 +162,7 @@ function drawGrid(){
   list.forEach((c,i)=>{
     const o=isOpen(c.u), b=document.createElement("button");
     b.className="acard"+(c.g==="o"?" org":"")+(o?"":" lock"); b.style.animationDelay=Math.min(i*25,400)+"ms";
-    if(o&&c.f&&c.g==="c"){const cc=COL[c.f]||["#4676c4","#223e78"];b.style.setProperty("--c0",cc[0]);b.style.setProperty("--c1",cc[1])}
+    if(o&&c.g==="c"){const cc=COL[c.f]||["#4676c4","#223e78"];b.style.setProperty("--c0",cc[0]);b.style.setProperty("--c1",cc[1])}
     if(o){
       const fc=c.f?'<div class="fc">'+faceSVG(c.f)+'</div>':'<div class="fc gl">'+GLASS+'</div>';
       const sec=c.s?'<span class="sec'+(isOpen(c.su)?' on':'')+'">'+(isOpen(c.su)?'✦':LOCK)+'</span>':"";
