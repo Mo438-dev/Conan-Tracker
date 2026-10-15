@@ -115,7 +115,7 @@ const css=`
 .acard.lock .nm,.acard.org.lock .nm{font-family:var(--f-num);font-size:.84rem;letter-spacing:.1em;color:inherit}
 .acard,#acardBig .bcard{text-shadow:0 1px 3px rgba(0,0,0,.35)}
 .acard.lock{text-shadow:none}
-#acardBig .sx.on{text-shadow:none}
+#acardBig .sx.on{text-shadow:none}#acardBig .nx{font-size:.78rem;opacity:.75;margin-top:4px}
 .acard .sec{position:absolute;top:6px;inset-inline-start:6px;width:20px;height:20px;border-radius:6px;background:rgba(0,0,0,.35);display:grid;place-items:center}
 .acard .sec svg{width:12px;height:12px}
 .acard .sec.on{background:#e9c46a;color:#1b1b1b}
@@ -204,25 +204,32 @@ function badge(){
   if(sheet.classList.contains("open")&&keys().join()!==drawn) drawGrid();
 }
 // celebrate a card unlocked by your own tap
-function unlockPop(c,isSecret){
+// queue: cards first (one by one), then arc / finale celebration. tap to advance, or auto after a few seconds
+const CQ=[]; let cqBusy=false;
+function cqNext(){ if(cqBusy) return; const t=CQ.shift(); if(!t) return; cqBusy=true; let fin=false; t(()=>{ if(fin) return; fin=true; cqBusy=false; setTimeout(cqNext,250); }); }
+function unlockPop(c,isSecret,done){
+  done=done||function(){};
   const cc=c.g==="o"?["#2a2c36","#0b0c10"]:(COL[c.f]||["#4676c4","#223e78"]);
-  setTimeout(()=>{
-    confetti(c.g==="o"?["#e9c46a","#ffffff","#2a2c36"]:[cc[0],"#ffd34d","#ffffff"],140);
-    const w=document.createElement("div");w.id="acardBig";w.dir="rtl";
-    const fc=c.f?'<div class="fc">'+faceSVG(c.f)+'</div>':'<div class="fc gl">'+GLASS+'</div>';
-    w.innerHTML='<div class="bcard'+(c.g==="o"?" org":"")+'" style="--c0:'+cc[0]+';--c1:'+cc[1]+'"><div class="ep hd">'+(isSecret?"🔓 انكشف سر!":"🃏 كرت جديد انفتح")+'</div>'+fc+'<h3>'+c.n+'</h3><div class="en">'+c.en+'</div>'+(isSecret?'<div class="sx on">✦ '+c.s+'</div>':'<p>'+c.d+'</p>')+'</div>';
-    w.onclick=()=>w.remove(); document.body.appendChild(w);
-    setTimeout(()=>w.remove(),5200);
-  },650);
+  confetti(c.g==="o"?["#e9c46a","#ffffff","#2a2c36"]:[cc[0],"#ffd34d","#ffffff"],140);
+  const old=document.getElementById("acardBig"); if(old) old.remove();
+  const w=document.createElement("div");w.id="acardBig";w.dir="rtl";
+  const fc=c.f?'<div class="fc">'+faceSVG(c.f)+'</div>':'<div class="fc gl">'+GLASS+'</div>';
+  const more=CQ.length?'<div class="nx">اضغط للتالي ←</div>':'';
+  w.innerHTML='<div class="bcard'+(c.g==="o"?" org":"")+'" style="--c0:'+cc[0]+';--c1:'+cc[1]+'"><div class="ep hd">'+(isSecret?"🔓 انكشف سر!":"🃏 كرت جديد انفتح")+'</div>'+fc+'<h3>'+c.n+'</h3><div class="en">'+c.en+'</div>'+(isSecret?'<div class="sx on">✦ '+c.s+'</div>':'<p>'+c.d+'</p>')+more+'</div>';
+  let gone=false; const close=()=>{ if(gone) return; gone=true; clearTimeout(tm); w.remove(); done(); };
+  w.onclick=close; document.body.appendChild(w);
+  const tm=setTimeout(close,6000);
 }
+const _celebrateArcs=celebrateArcs; let arcHold=null;
+celebrateArcs=function(d){ if(arcHold){ arcHold.push(d); return; } _celebrateArcs(d); };
 const _toggle=toggle;
 toggle=function(id){
-  const before=new Set(keys()); _toggle(id);
+  const before=new Set(keys()); arcHold=[];
+  try{ _toggle(id); } finally { var arcs=arcHold; arcHold=null; }
   const nowK=keys().filter(k=>!before.has(k));
-  if(nowK.length){
-    const k=nowK[nowK.length-1], c=CARDS.find(x=>x.k===k.split(":")[0]);
-    if(c) unlockPop(c,k.endsWith(":s"));
-  }
+  for(const k of nowK){ const c=CARDS.find(x=>x.k===k.split(":")[0]); if(c) CQ.push(done=>unlockPop(c,k.endsWith(":s"),done)); }
+  for(const d of arcs){ CQ.push(done=>{ _celebrateArcs(d); const el=document.querySelector(".cheer"); if(!el) return done(); el.addEventListener("click",done); setTimeout(done,3700); }); }
+  if(CQ.length) setTimeout(cqNext,nowK.length?650:0);
   badge();
 };
 const _render=render;
