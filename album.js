@@ -214,7 +214,7 @@ function unlockPop(c,isSecret,done){
   const old=document.getElementById("acardBig"); if(old) old.remove();
   const w=document.createElement("div");w.id="acardBig";w.dir="rtl";
   const fc=c.f?'<div class="fc">'+faceSVG(c.f)+'</div>':'<div class="fc gl">'+GLASS+'</div>';
-  const more=CQ.length?'<div class="nx">اضغط للتالي ←</div>':'';
+  const more=CQ.some(t=>t.card)?'<div class="nx">اضغط للتالي ←</div>':'';
   w.innerHTML='<div class="bcard'+(c.g==="o"?" org":"")+'" style="--c0:'+cc[0]+';--c1:'+cc[1]+'"><div class="ep hd">'+(isSecret?"🔓 انكشف سر!":"🃏 كرت جديد انفتح")+'</div>'+fc+'<h3>'+c.n+'</h3><div class="en">'+c.en+'</div>'+(isSecret?'<div class="sx on">✦ '+c.s+'</div>':'<p>'+c.d+'</p>')+more+'</div>';
   let gone=false; const close=()=>{ if(gone) return; gone=true; clearTimeout(tm); w.remove(); done(); };
   w.onclick=close; document.body.appendChild(w);
@@ -227,9 +227,12 @@ toggle=function(id){
   const before=new Set(keys()); arcHold=[];
   try{ _toggle(id); } finally { var arcs=arcHold; arcHold=null; }
   const nowK=keys().filter(k=>!before.has(k));
-  for(const k of nowK){ const c=CARDS.find(x=>x.k===k.split(":")[0]); if(c) CQ.push(done=>unlockPop(c,k.endsWith(":s"),done)); }
+  // only celebrate cards whose debut/reveal is this very episode (not one that happened in an earlier episode we skip)
+  const exact=ep=>DATA.some(d=>{const[a,b]=range(d);return ep>=a&&ep<=b});
+  for(const k of nowK){ const c=CARDS.find(x=>x.k===k.split(":")[0]); if(!c) continue; const sec=k.endsWith(":s");
+    if(!exact(sec?c.su:c.u)) continue; const t=done=>unlockPop(c,sec,done); t.card=true; CQ.push(t); }
   for(const d of arcs){ CQ.push(done=>{ _celebrateArcs(d); const el=document.querySelector(".cheer"); if(!el) return done(); el.addEventListener("click",done); setTimeout(done,3700); }); }
-  if(CQ.length) setTimeout(cqNext,nowK.length?650:0);
+  if(CQ.length) setTimeout(cqNext,CQ.some(t=>t.card)?650:0);
   badge();
 };
 const _render=render;
