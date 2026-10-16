@@ -218,7 +218,7 @@ function unlockPop(c,isSecret,done){
   w.innerHTML='<div class="bcard'+(c.g==="o"?" org":"")+'" style="--c0:'+cc[0]+';--c1:'+cc[1]+'"><div class="ep hd">'+(isSecret?"🔓 انكشف سر!":"🃏 كرت جديد انفتح")+'</div>'+fc+'<h3>'+c.n+'</h3><div class="en">'+c.en+'</div>'+(isSecret?'<div class="sx on">✦ '+c.s+'</div>':'<p>'+c.d+'</p>')+more+'</div>';
   let gone=false; const close=()=>{ if(gone) return; gone=true; clearTimeout(tm); w.remove(); done(); };
   w.onclick=close; document.body.appendChild(w);
-  const tm=setTimeout(close,6000);
+  const tm=setTimeout(close,3000);
 }
 const _celebrateArcs=celebrateArcs; let arcHold=null;
 celebrateArcs=function(d){ if(arcHold){ arcHold.push(d); return; } _celebrateArcs(d); };
